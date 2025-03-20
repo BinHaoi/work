@@ -1,0 +1,33 @@
+import os
+
+# 直接指定固定路径
+folder_path = r"D:\音纹检析\已修改过10"
+
+# 检查路径是否存在且是文件夹
+if not os.path.isdir(folder_path):
+    print("错误：路径不存在或不是文件夹！")
+else:
+    # 获取所有子文件夹的名称（仅名称，不包含完整路径）
+    subfolder_names = [
+        name  # 直接获取文件夹名称
+        for name in os.listdir(folder_path)  # 遍历文件夹内容
+        if os.path.isdir(os.path.join(folder_path, name))  # 检查是否是文件夹
+    ]
+
+    # 如果没有子文件夹，提示用户
+    if not subfolder_names:
+        print("该文件夹中没有子文件夹！")
+    else:
+        # 打印到屏幕
+        print("\n子文件夹名称列表：")
+        for name in subfolder_names:
+            print(name)
+
+        # 写入txt文件
+        try:
+            with open("subfolder_names.txt", "w", encoding="utf-8") as f:
+                for name in subfolder_names:
+                    f.write(f"{name}\n")
+            print("\n子文件夹名称已保存至当前目录的 subfolder_names.txt 文件")
+        except Exception as e:
+            print(f"\n保存文件时出错：{str(e)}")
