@@ -1,0 +1,24 @@
+import os
+# 直接指定固定路径
+folder_path = r"D:\音纹检析\newclean_thr05_0319\000\0"
+if not os.path.isdir(folder_path):
+    print("错误：路径不存在或不是文件夹！")
+else:
+    # 获取所有文件名称（不包括子目录），并去掉扩展名
+    file_names = [
+        os.path.splitext(entry)[0]  # 使用os.path.splitext去掉扩展名
+        for entry in os.listdir(folder_path)
+        if os.path.isfile(os.path.join(folder_path, entry))
+    ]
+    # 打印到屏幕
+    print("\n文件名列表（无扩展名）：")
+    for name in file_names:
+        print(name)
+    # 写入txt文件
+    try:
+        with open("file_names.txt", "w", encoding="utf-8") as f:
+            for name in file_names:
+                f.write(f"{name}\n")
+        print("\n文件名（无扩展名）已保存至当前目录的 file_names.txt 文件")
+    except Exception as e:
+        print(f"\n保存文件时出错：{str(e)}")
