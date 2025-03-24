@@ -1,0 +1,82 @@
+import pandas as pd
+
+
+def detect_problems(excel_path, check_columns, special_texts=None):
+    """
+    检测 Excel 指定列中的空白行或特殊文本行
+    :param excel_path: Excel 文件路径
+    :param check_columns: 要检测的列名列表（如 ["姓名", "年龄"]）或前 N 列的数值（如 3）
+    :param special_texts: 需要检测的特殊文本列表（如 ["N/A", "待补充"]）
+    """
+    try:
+        # 读取 Excel 文件
+        df = pd.read_excel(excel_path)
+
+        # 确定要检测的列
+        if isinstance(check_columns, int):
+            # 前 N 列（例如前3列）
+            target_columns = df.columns[:check_columns].tolist()
+        else:
+            # 指定列名
+            target_columns = [col for col in check_columns if col in df.columns]
+
+        if not target_columns:
+            print("错误：指定的列不存在！")
+            return
+
+        # 检测空白行和特殊文本行
+        blank_rows = []
+        special_text_rows = []
+
+        for index, row in df.iterrows():
+            # 检测空白行（指定列中存在空值）
+            if row[target_columns].isnull().any():
+                blank_rows.append({
+                    "行号": index + 2,  # Excel 实际行号从第2行开始（假设第一行是标题）
+                    "问题类型": "空白行",
+                    "内容": row[target_columns].to_dict()
+                })
+
+            # 检测特殊文本行
+            if special_texts:
+                for col in target_columns:
+                    cell_value = str(row[col]).strip()  # 转换为字符串并去空格
+                    for text in special_texts:
+                        if text in cell_value:
+                            special_text_rows.append({
+                                "行号": index + 2,
+                                "问题类型": "特殊文本",
+                                "列名": col,
+                                "内容": cell_value,
+                                "匹配文本": text
+                            })
+
+        # 输出结果
+        print(f"\n文件 '{excel_path}' 检测结果：")
+        if blank_rows:
+            print("\n=== 空白行 ===")
+            for item in blank_rows:
+                print(f"行号：{item['行号']}, 问题列内容：{item['内容']}")
+
+        if special_text_rows:
+            print("\n=== 特殊文本行 ===")
+            for item in special_text_rows:
+                print(f"行号：{item['行号']}, 列名：{item['列名']}, 内容：{item['内容']}, 匹配文本：{item['匹配文本']}")
+
+        if not blank_rows and not special_text_rows:
+            print("未发现空白行或特殊文本行！")
+
+    except Exception as e:
+        print(f"检测失败：{str(e)}")
+
+
+# 示例用法
+if __name__ == "__main__":
+    excel_file = "y.xlsx"  # 替换为你的 Excel 文件路径
+
+    # 检测前3列中的空白行和特殊文本行
+    detect_problems(
+        excel_path=excel_file,
+        check_columns=3,  # 检测前3列，也可指定列名如 ["姓名", "城市"]
+        special_texts=["N/A", "待补充", "NULL"]  # 自定义需要检测的特殊文本
+    )
